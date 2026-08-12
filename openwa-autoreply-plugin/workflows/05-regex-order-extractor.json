@@ -1,0 +1,69 @@
+{
+  "name": "One-Line Regex Order ID Extractor",
+  "nodes": [
+    {
+      "id": "node_trigger_order",
+      "type": "trigger",
+      "x": 100,
+      "y": 180,
+      "data": {
+        "matchType": "starts_with",
+        "matchValue": "order",
+        "chatScope": "all",
+        "triggerOnSelfSent": false,
+        "restrictToOwner": false,
+        "restrictedEmoji": "🎉",
+        "requireMentionedSelf": false,
+        "stripSelfMentionBeforeMatch": false
+      }
+    },
+    {
+      "id": "node_extract_order",
+      "type": "extract_regex",
+      "x": 380,
+      "y": 180,
+      "data": {
+        "pattern": "order\\s+(?<orderid>\\d{5,12})",
+        "variableName": "orderid"
+      }
+    },
+    {
+      "id": "node_api_order",
+      "type": "api_call",
+      "x": 660,
+      "y": 180,
+      "data": {
+        "method": "GET",
+        "url": "https://httpbin.org/get?orderid={orderid}&user={sender_number}",
+        "headers": {},
+        "body": ""
+      }
+    },
+    {
+      "id": "node_reply_order",
+      "type": "reply_text",
+      "x": 940,
+      "y": 180,
+      "data": {
+        "text": "📦 Order Status for #{orderid}\n\nCustomer: {name}\nHTTP Status: {status}\nQueried URL: {data.url}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1_2",
+      "source": "node_trigger_order",
+      "target": "node_extract_order"
+    },
+    {
+      "id": "edge_2_3",
+      "source": "node_extract_order",
+      "target": "node_api_order"
+    },
+    {
+      "id": "edge_3_4",
+      "source": "node_api_order",
+      "target": "node_reply_order"
+    }
+  ]
+}

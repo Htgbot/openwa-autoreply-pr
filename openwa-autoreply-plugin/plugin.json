@@ -1,0 +1,18 @@
+{
+  "name": "openwa-autoreply-plugin",
+  "version": "1.0.0",
+  "description": "Visual Auto-Reply Workflow Engine & Blueprint Collection for OpenWA Gateway",
+  "author": "OpenWA Contributors",
+  "license": "MIT",
+  "homepage": "https://github.com/Htgbot/OPENWA",
+  "keywords": [
+    "openwa",
+    "whatsapp",
+    "auto-reply",
+    "workflow",
+    "bot",
+    "sticker",
+    "webhook"
+  ],
+  "main": "workflows/01-image-to-sticker.json"
+}

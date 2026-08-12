@@ -1,0 +1,103 @@
+{
+  "name": "2-Step Interactive NIC / Order Lookup",
+  "nodes": [
+    {
+      "id": "node_trig_nic",
+      "type": "trigger",
+      "x": 100,
+      "y": 180,
+      "data": {
+        "matchType": "equals",
+        "matchValue": "nic",
+        "chatScope": "all",
+        "triggerOnSelfSent": false,
+        "restrictToOwner": false,
+        "restrictedEmoji": "🎉",
+        "requireMentionedSelf": false,
+        "stripSelfMentionBeforeMatch": false
+      }
+    },
+    {
+      "id": "node_prompt_nic",
+      "type": "prompt_input",
+      "x": 380,
+      "y": 180,
+      "data": {
+        "promptText": "Please send your NIC number only:",
+        "variableName": "nic"
+      }
+    },
+    {
+      "id": "node_api_lookup",
+      "type": "api_call",
+      "x": 660,
+      "y": 180,
+      "data": {
+        "method": "POST",
+        "url": "https://httpbin.org/post?nic={nic}&chatid={chat_id}",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"nic\": \"{nic}\", \"sender\": \"{sender_number}\"}"
+      }
+    },
+    {
+      "id": "node_cond_api_ok",
+      "type": "condition",
+      "x": 940,
+      "y": 180,
+      "data": {
+        "variable": "status",
+        "operator": "==",
+        "value": "200"
+      }
+    },
+    {
+      "id": "node_reply_success",
+      "type": "reply_text",
+      "x": 1220,
+      "y": 100,
+      "data": {
+        "text": "✅ Verification Successful for {name}!\n\nNIC: {nic}\nStatus: {status}\nURL: {data.url}\nDate: {datetime}"
+      }
+    },
+    {
+      "id": "node_reply_failed",
+      "type": "reply_text",
+      "x": 1220,
+      "y": 280,
+      "data": {
+        "text": "❌ Verification Failed for {name}.\n\nNIC: {nic}\nError Code: {status}\nDetails: {response_error}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_trig_prompt",
+      "source": "node_trig_nic",
+      "target": "node_prompt_nic"
+    },
+    {
+      "id": "edge_prompt_api",
+      "source": "node_prompt_nic",
+      "target": "node_api_lookup"
+    },
+    {
+      "id": "edge_api_cond",
+      "source": "node_api_lookup",
+      "target": "node_cond_api_ok"
+    },
+    {
+      "id": "edge_cond_true",
+      "source": "node_cond_api_ok",
+      "target": "node_reply_success",
+      "sourceHandle": "true"
+    },
+    {
+      "id": "edge_cond_false",
+      "source": "node_cond_api_ok",
+      "target": "node_reply_failed",
+      "sourceHandle": "false"
+    }
+  ]
+}

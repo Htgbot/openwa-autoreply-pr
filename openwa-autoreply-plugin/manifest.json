@@ -1,0 +1,10 @@
+{
+  "id": "openwa-autoreply-workflows",
+  "name": "Auto-Reply Workflow & Blueprint Pack",
+  "version": "1.0.0",
+  "type": "extension",
+  "description": "Visual Auto-Reply Workflows & Blueprint Collection for OpenWA Gateway",
+  "main": "index.js",
+  "author": "OpenWA Contributors",
+  "license": "MIT"
+}

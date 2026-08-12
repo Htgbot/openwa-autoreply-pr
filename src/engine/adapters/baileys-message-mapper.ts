@@ -216,21 +216,65 @@ export function extractBaileysContext(content: BaileysContextContent): BaileysMe
   };
 
   if (contextInfo?.quotedMessage && contextInfo.stanzaId) {
-    const qm = contextInfo.quotedMessage as {
-      conversation?: string | null;
-      extendedTextMessage?: { text?: string | null } | null;
-      imageMessage?: { caption?: string | null } | null;
-      videoMessage?: { caption?: string | null } | null;
-      documentMessage?: { caption?: string | null } | null;
-    };
+    const qm = contextInfo.quotedMessage as any;
+    const conversation = qm.conversation || qm.extendedTextMessage?.text;
+    const img = qm.imageMessage || qm.viewOnceMessage?.message?.imageMessage || qm.viewOnceMessageV2?.message?.imageMessage;
+    const vid = qm.videoMessage || qm.viewOnceMessage?.message?.videoMessage || qm.viewOnceMessageV2?.message?.videoMessage;
+    const doc = qm.documentMessage;
+    const aud = qm.audioMessage;
+    const stk = qm.stickerMessage;
+
+    const isViewOnce = Boolean(qm.viewOnceMessage || qm.viewOnceMessageV2 || img?.viewOnce || vid?.viewOnce);
+    let type = 'unknown';
+    let hasMedia = false;
+    let mimetype: string | undefined;
+    let filename: string | undefined;
+
+    if (isViewOnce) {
+      type = 'view_once';
+      hasMedia = true;
+    } else if (img) {
+      type = 'image';
+      hasMedia = true;
+      mimetype = img.mimetype || 'image/jpeg';
+    } else if (vid) {
+      type = 'video';
+      hasMedia = true;
+      mimetype = vid.mimetype || 'video/mp4';
+    } else if (doc) {
+      type = 'document';
+      hasMedia = true;
+      mimetype = doc.mimetype || 'application/octet-stream';
+      filename = doc.fileName || doc.title || undefined;
+    } else if (aud) {
+      type = 'audio';
+      hasMedia = true;
+      mimetype = aud.mimetype || 'audio/ogg';
+    } else if (stk) {
+      type = 'sticker';
+      hasMedia = true;
+      mimetype = stk.mimetype || 'image/webp';
+    } else if (conversation) {
+      type = 'text';
+    }
+
     const qBody =
-      qm.conversation ??
-      qm.extendedTextMessage?.text ??
-      qm.imageMessage?.caption ??
-      qm.videoMessage?.caption ??
-      qm.documentMessage?.caption ??
+      conversation ??
+      img?.caption ??
+      vid?.caption ??
+      doc?.caption ??
+      doc?.fileName ??
       '';
-    context.quotedMessage = { id: contextInfo.stanzaId, body: qBody };
+
+    context.quotedMessage = {
+      id: contextInfo.stanzaId,
+      body: qBody,
+      type,
+      hasMedia,
+      mimetype,
+      filename,
+      isViewOnce,
+    };
   }
 
   return context;

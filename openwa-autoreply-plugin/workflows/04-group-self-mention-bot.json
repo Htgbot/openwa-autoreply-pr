@@ -1,0 +1,37 @@
+{
+  "name": "Dynamic Self Mention Update Bot",
+  "nodes": [
+    {
+      "id": "node_trigger_self_mention",
+      "type": "trigger",
+      "x": 100,
+      "y": 180,
+      "data": {
+        "matchType": "equals",
+        "matchValue": "update",
+        "chatScope": "group",
+        "triggerOnSelfSent": true,
+        "restrictToOwner": true,
+        "restrictedEmoji": "🤖",
+        "requireMentionedSelf": true,
+        "stripSelfMentionBeforeMatch": true
+      }
+    },
+    {
+      "id": "node_reply_mention_info",
+      "type": "reply_text",
+      "x": 480,
+      "y": 180,
+      "data": {
+        "text": "🤖 SELF MENTION DETECTED\n\nMentioned Self: {mentioned_self}\nMentions: {mentions}\n\nSelf ID: {self_id}\nSelf LID: {self_lid}\n\nOriginal Message: {message}\n\nSender: {sender_number}\nSender ID: {sender_id}\nChat ID: {chat_id}\nChat Type: {chat_type}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_self_mention_reply",
+      "source": "node_trigger_self_mention",
+      "target": "node_reply_mention_info"
+    }
+  ]
+}

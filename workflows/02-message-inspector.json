@@ -1,0 +1,69 @@
+{
+  "name": "Owner Replied Message Inspector",
+  "nodes": [
+    {
+      "id": "node_trigger_reply",
+      "type": "trigger",
+      "x": 100,
+      "y": 180,
+      "data": {
+        "matchType": "equals",
+        "matchValue": ".reply",
+        "chatScope": "all",
+        "triggerOnSelfSent": true,
+        "restrictToOwner": true,
+        "restrictedEmoji": "🔎",
+        "requireMentionedSelf": false,
+        "stripSelfMentionBeforeMatch": false
+      }
+    },
+    {
+      "id": "node_condition_reply_exists",
+      "type": "condition",
+      "x": 380,
+      "y": 180,
+      "data": {
+        "variable": "reply_exists",
+        "operator": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "node_reply_info",
+      "type": "reply_text",
+      "x": 700,
+      "y": 100,
+      "data": {
+        "text": "🔎 REPLIED MESSAGE INFO\n\nExists: {reply_exists}\nType: {reply_type}\nText: {reply_text}\n\nHas Media: {reply_has_media}\nMedia URL: {reply_media_url}\nMedia Base64: {reply_media_base64}\nMimetype: {reply_mimetype}\nFilename: {reply_filename}\n\nView Once: {reply_view_once}\nMessage ID: {reply_message_id}\n\nChat ID: {chat_id}\nChat Type: {chat_type}"
+      }
+    },
+    {
+      "id": "node_reply_no_reply",
+      "type": "reply_text",
+      "x": 700,
+      "y": 300,
+      "data": {
+        "text": "🔎 This command was not sent as a reply to another message."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_reply_trigger_condition",
+      "source": "node_trigger_reply",
+      "target": "node_condition_reply_exists"
+    },
+    {
+      "id": "edge_reply_true",
+      "source": "node_condition_reply_exists",
+      "target": "node_reply_info",
+      "sourceHandle": "true"
+    },
+    {
+      "id": "edge_reply_false",
+      "source": "node_condition_reply_exists",
+      "target": "node_reply_no_reply",
+      "sourceHandle": "false"
+    }
+  ]
+}

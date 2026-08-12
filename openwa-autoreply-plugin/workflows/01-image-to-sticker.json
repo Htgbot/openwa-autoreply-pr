@@ -1,0 +1,104 @@
+{
+  "name": "Owner Image to Sticker Converter",
+  "nodes": [
+    {
+      "id": "node_trigger_sticker",
+      "type": "trigger",
+      "x": 100,
+      "y": 180,
+      "data": {
+        "matchType": "equals",
+        "matchValue": ".sticker",
+        "chatScope": "all",
+        "triggerOnSelfSent": true,
+        "restrictToOwner": true,
+        "restrictedEmoji": "☠️",
+        "requireMentionedSelf": false,
+        "stripSelfMentionBeforeMatch": false
+      }
+    },
+    {
+      "id": "node_condition_has_reply",
+      "type": "condition",
+      "x": 350,
+      "y": 180,
+      "data": {
+        "variable": "reply_exists",
+        "operator": "==",
+        "value": "true"
+      }
+    },
+    {
+      "id": "node_condition_is_image",
+      "type": "condition",
+      "x": 600,
+      "y": 120,
+      "data": {
+        "variable": "reply_type",
+        "operator": "==",
+        "value": "image"
+      }
+    },
+    {
+      "id": "node_send_sticker",
+      "type": "reply_media",
+      "x": 850,
+      "y": 80,
+      "data": {
+        "mediaType": "sticker",
+        "mediaSource": "replied_message",
+        "mediaUrl": "{reply_media_url}",
+        "mediaBase64": "{reply_media_base64}"
+      }
+    },
+    {
+      "id": "node_reply_not_image",
+      "type": "reply_text",
+      "x": 850,
+      "y": 240,
+      "data": {
+        "text": "☠️ Replied message type: {reply_type}\nPlease reply directly to an image with .sticker"
+      }
+    },
+    {
+      "id": "node_reply_not_reply",
+      "type": "reply_text",
+      "x": 600,
+      "y": 380,
+      "data": {
+        "text": "☠️ Not a reply.\nPlease reply directly to an image with .sticker"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_sticker_trigger_reply",
+      "source": "node_trigger_sticker",
+      "target": "node_condition_has_reply"
+    },
+    {
+      "id": "edge_sticker_has_reply",
+      "source": "node_condition_has_reply",
+      "target": "node_condition_is_image",
+      "sourceHandle": "true"
+    },
+    {
+      "id": "edge_sticker_no_reply",
+      "source": "node_condition_has_reply",
+      "target": "node_reply_not_reply",
+      "sourceHandle": "false"
+    },
+    {
+      "id": "edge_sticker_is_image",
+      "source": "node_condition_is_image",
+      "target": "node_send_sticker",
+      "sourceHandle": "true"
+    },
+    {
+      "id": "edge_sticker_not_image",
+      "source": "node_condition_is_image",
+      "target": "node_reply_not_image",
+      "sourceHandle": "false"
+    }
+  ]
+}

@@ -64,15 +64,7 @@ export function registerWwebjsMessageEvents(client: Client, host: WwebjsEngineHo
 
       // Handle quoted message
       if (msg.hasQuotedMsg) {
-        try {
-          const quoted = await msg.getQuotedMessage();
-          incomingMessage.quotedMessage = {
-            id: quoted.id._serialized,
-            body: quoted.body,
-          };
-        } catch (error) {
-          host.logger.error('Error getting quoted message', String(error));
-        }
+        incomingMessage.quotedMessage = await extractQuotedMessageFromWwebjs(msg, host);
       }
 
       // Surface call-log detail on the live path too (getChatHistory already does this), so a missed/
@@ -110,6 +102,11 @@ export function registerWwebjsMessageEvents(client: Client, host: WwebjsEngineHo
           });
         }
       }
+
+      if (msg.hasQuotedMsg) {
+        incomingMessage.quotedMessage = await extractQuotedMessageFromWwebjs(msg, host);
+      }
+
       try {
         host.getCallbacks().onMessageCreate?.(incomingMessage);
       } catch (error) {
@@ -220,4 +217,58 @@ export function registerWwebjsMessageEvents(client: Client, host: WwebjsEngineHo
       host.logger.error('Error processing message_edit', String(error));
     }
   });
+}
+
+async function extractQuotedMessageFromWwebjs(msg: any, host: any) {
+  try {
+    const quoted = await msg.getQuotedMessage();
+    if (quoted) {
+      let mediaUrl: string | undefined;
+      let mediaBase64: string | undefined;
+      let mimetype: string | undefined;
+      let filename: string | undefined;
+      const hasMedia = Boolean(quoted.hasMedia);
+      const isViewOnce = Boolean((quoted as any).isViewOnce);
+
+      const rawType = String(quoted.type || '');
+      let type = 'unknown';
+      if (isViewOnce) type = 'view_once';
+      else if (rawType === 'chat') type = 'text';
+      else if (rawType === 'image') type = 'image';
+      else if (rawType === 'document') type = 'document';
+      else if (rawType === 'audio' || rawType === 'ptt') type = 'audio';
+      else if (rawType === 'video') type = 'video';
+      else if (rawType === 'sticker') type = 'sticker';
+      else if (rawType) type = rawType;
+
+      if (hasMedia) {
+        try {
+          const media = await quoted.downloadMedia();
+          if (media && media.data) {
+            mediaBase64 = media.data;
+            mimetype = media.mimetype;
+            filename = media.filename || (quoted as any).filename || (quoted as any).caption || undefined;
+            mediaUrl = `data:${media.mimetype};base64,${media.data}`;
+          }
+        } catch (err) {
+          host.logger.warn('Failed to download quoted media', String(err));
+        }
+      }
+
+      return {
+        id: quoted.id?._serialized || (quoted.id as any),
+        body: quoted.body || (quoted as any).caption || '',
+        type,
+        hasMedia,
+        mediaUrl,
+        mediaBase64,
+        mimetype,
+        filename,
+        isViewOnce,
+      };
+    }
+  } catch (error) {
+    host.logger.error('Error getting quoted message', String(error));
+  }
+  return undefined;
 }

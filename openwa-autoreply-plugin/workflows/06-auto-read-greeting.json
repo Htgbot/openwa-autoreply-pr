@@ -1,0 +1,49 @@
+{
+  "name": "Auto Mark-Read & Welcome Greeting",
+  "nodes": [
+    {
+      "id": "node_trig_hi",
+      "type": "trigger",
+      "x": 100,
+      "y": 180,
+      "data": {
+        "matchType": "contains",
+        "matchValue": "hello",
+        "chatScope": "personal",
+        "triggerOnSelfSent": false,
+        "restrictToOwner": false,
+        "restrictedEmoji": "🎉",
+        "requireMentionedSelf": false,
+        "stripSelfMentionBeforeMatch": false
+      }
+    },
+    {
+      "id": "node_mark_read",
+      "type": "mark_read",
+      "x": 380,
+      "y": 180,
+      "data": {}
+    },
+    {
+      "id": "node_reply_greeting",
+      "type": "reply_text",
+      "x": 660,
+      "y": 180,
+      "data": {
+        "text": "👋 Hello {name}!\n\nWelcome to our WhatsApp Support.\nDate: {date} | Time: {time}\n\nHow can we help you today?"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_trig_read",
+      "source": "node_trig_hi",
+      "target": "node_mark_read"
+    },
+    {
+      "id": "edge_read_greeting",
+      "source": "node_mark_read",
+      "target": "node_reply_greeting"
+    }
+  ]
+}
